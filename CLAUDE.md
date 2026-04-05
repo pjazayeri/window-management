@@ -2,6 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Distribution TODO
+
+Steps needed before the first shippable `.dmg` can be produced:
+
+- [ ] Sign up for Apple Developer Program — [developer.apple.com](https://developer.apple.com) ($99/yr)
+- [ ] Note your 10-char **Team ID** from developer.apple.com → Membership
+- [ ] Create a **Developer ID Application** certificate — Xcode → Settings → Accounts → Manage Certificates
+- [ ] Generate an **app-specific password** — [appleid.apple.com](https://appleid.apple.com) → App-Specific Passwords
+- [ ] Store credentials in keychain (one-time): `make notarize-store-creds APPLE_TEAM_ID=... APPLE_ID=... NOTARIZE_PROFILE=windowmanager`
+- [ ] Ship: `make dist APPLE_TEAM_ID=... NOTARIZE_PROFILE=windowmanager` → produces `build/WindowManager-1.0.dmg`
+- [ ] Pick a storefront — Gumroad, your own site, or [Setapp](https://setapp.com) (no sandbox requirement)
+
 ## Build & Run
 
 ```sh
@@ -76,14 +88,49 @@ To regenerate after changing the design:
 make icons   # runs scripts/generate_icon.swift → writes AppIcon.appiconset/*.png
 ```
 
-### Signing / distribution (when Apple Developer account is available)
+### Signing / distribution
 
-1. In `project.yml`, change `CODE_SIGN_STYLE: Manual` → `CODE_SIGN_STYLE: Automatic` and add `DEVELOPMENT_TEAM: <your-team-id>`.
-2. Run `make generate` to regenerate `WindowManager.xcodeproj`.
-3. Open in Xcode → Product → Archive → Distribute → Developer ID.
-4. Notarize via `xcrun notarytool`.
+**App Sandbox must remain disabled** (`WindowManager.entitlements`) — the Accessibility API is incompatible with sandboxing. This means the **Mac App Store is not an option**. Distribute via direct download (Gumroad, your site, Setapp, etc.) with a notarized `.dmg`.
 
-**App Sandbox must remain disabled** (`WindowManager.entitlements`) — the Accessibility API is incompatible with sandboxing, which also means the Mac App Store is not a distribution option.
+Prerequisites: Apple Developer Program membership ($99/yr). Your Team ID is the 10-character string at [developer.apple.com/account](https://developer.apple.com/account) → Membership.
+
+#### One-time setup
+
+```sh
+# 1. Store notarization credentials in keychain (avoids passing them on every build)
+make notarize-store-creds \
+  APPLE_TEAM_ID=XXXXXXXXXX \
+  APPLE_ID=you@example.com \
+  NOTARIZE_PROFILE=windowmanager
+# Prompts for an app-specific password — generate one at appleid.apple.com
+```
+
+#### Build a release DMG
+
+```sh
+# Full pipeline: sign app → create DMG → notarize → staple
+make dist APPLE_TEAM_ID=XXXXXXXXXX NOTARIZE_PROFILE=windowmanager
+
+# Or without stored credentials:
+make dist \
+  APPLE_TEAM_ID=XXXXXXXXXX \
+  APPLE_ID=you@example.com \
+  APPLE_PASSWORD=xxxx-xxxx-xxxx-xxxx   # app-specific password
+
+# Output: build/WindowManager-1.0.dmg  (notarized, stapled, ready to ship)
+```
+
+Individual steps if you need to run them separately:
+```sh
+make signed-app APPLE_TEAM_ID=XXXXXXXXXX   # build + sign with Developer ID
+make dmg        APPLE_TEAM_ID=XXXXXXXXXX   # package into .dmg
+make notarize   NOTARIZE_PROFILE=windowmanager  # submit to Apple, wait for result
+make staple                                 # staple ticket to .dmg
+```
+
+#### Bumping the version
+
+Edit `CFBundleShortVersionString` in `Resources/Info.plist`. The DMG filename picks it up automatically.
 
 ### Adding a new snap position
 
