@@ -2,6 +2,7 @@
 *.app/
 .DS_Store
 build/
+.claude/
 *.xcodeproj/xcuserdata/
 *.xcodeproj/project.xcworkspace/xcshareddata/
 
