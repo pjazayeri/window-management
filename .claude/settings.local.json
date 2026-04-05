@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(swift build:*)",
+      "Bash(make app:*)",
+      "Bash(gh auth:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(gh repo:*)",
+      "Bash(xcode-select -p)",
+      "Bash(sw_vers)",
+      "Bash(brew install:*)",
+      "Bash(swift:*)",
+      "Bash(xcodegen generate:*)",
+      "Bash(mdfind \"kMDItemCFBundleIdentifier == 'com.apple.dt.Xcode'\")"
+    ]
+  }
+}

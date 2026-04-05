@@ -3,11 +3,12 @@ import PackageDescription
 
 let package = Package(
     name: "WindowManager",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS(.v14)],
     targets: [
         .executableTarget(
             name: "WindowManager",
-            path: "Sources/WindowManager"
+            path: "Sources/WindowManager",
+            resources: [.process("Assets.xcassets")]
         )
     ]
 )

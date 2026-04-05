@@ -22,17 +22,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         let menu = NSMenu()
-
-        let title = NSMenuItem(title: "WindowManager", action: nil, keyEquivalent: "")
-        title.isEnabled = false
-        menu.addItem(title)
-        menu.addItem(.separator())
-
         menu.addItem(
-            NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q")
+            NSMenuItem(title: "Preferences…", action: #selector(openPreferences), keyEquivalent: ",")
         )
-
+        menu.addItem(.separator())
+        menu.addItem(
+            NSMenuItem(title: "Quit WindowManager", action: #selector(quit), keyEquivalent: "q")
+        )
         statusItem?.menu = menu
+    }
+
+    @objc private func openPreferences() {
+        PreferencesWindowController.shared.show()
     }
 
     @objc private func quit() {
@@ -43,10 +44,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func requestAccessibilityIfNeeded() {
         let key = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
-        let trusted = AXIsProcessTrustedWithOptions([key: true] as CFDictionary)
-        if !trusted {
-            // System has shown the System Preferences prompt.
-            // The hotkeys will silently no-op until access is granted.
-        }
+        _ = AXIsProcessTrustedWithOptions([key: true] as CFDictionary)
     }
 }
